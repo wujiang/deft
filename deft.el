@@ -612,7 +612,7 @@ title."
         (widget-insert (propertize (substring summary 0 summary-width)
 				   'face 'deft-summary-face)))
       (when mtime
-	(while (< (current-column) line-width)
+	(while (< (current-column) (- line-width 1))
 	  (widget-insert " "))
 	(widget-insert (propertize mtime 'face 'deft-time-face)))
       (widget-insert "\n"))))
