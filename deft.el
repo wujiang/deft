@@ -278,7 +278,7 @@ Set to zero to disable."
   :type 'float
   :group 'deft)
 
-(defcustom deft-time-format " %Y-%m-%d %H:%M"
+(defcustom deft-time-format "%Y-%m-%d %H:%M"
   "Format string for modification times in the Deft browser.
 Set to nil to hide."
   :type '(choice (string :tag "Time format")
