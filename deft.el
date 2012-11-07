@@ -278,11 +278,11 @@ Set to zero to disable."
   :type 'float
   :group 'deft)
 
-(defcustom deft-time-format "%Y-%m-%d %H:%M"
+(defcustom deft-time-format " %Y-%m-%d %H:%M"
   "Format string for modification times in the Deft browser.
 Set to nil to hide."
   :type '(choice (string :tag "Time format")
-		 (const :tag "Hide" nil))
+                 (const :tag "Hide" nil))
   :group 'deft)
 
 (defcustom deft-use-filename-as-title nil
@@ -585,18 +585,18 @@ title."
   "Add a line to the file browser for the given FILE."
   (when file
     (let* ((key (file-name-nondirectory file))
-	   (text (deft-file-contents file))
-	   (title (deft-file-title file))
-	   (summary (deft-file-summary file))
-	   (mtime (when deft-time-format
-		    (format-time-string deft-time-format (deft-file-mtime file))))
-	   (mtime-width (length mtime))
-	   (line-width (- deft-window-width mtime-width))
-	   (title-width (min line-width (length title)))
-	   (summary-width (min (length summary)
-			       (- line-width
-				  title-width
-				  (length deft-separator)))))
+           (text (deft-file-contents file))
+           (title (deft-file-title file))
+           (summary (deft-file-summary file))
+           (mtime (when deft-time-format
+                    (format-time-string deft-time-format (deft-file-mtime file))))
+           (mtime-width (length mtime))
+           (line-width (- deft-window-width mtime-width 1))
+           (title-width (min line-width (length title)))
+           (summary-width (min (length summary)
+                               (- line-width
+                                  title-width
+                                  (length deft-separator) 1))))
       (widget-create 'link
                      :button-prefix ""
                      :button-suffix ""
@@ -610,16 +610,16 @@ title."
       (when (> summary-width 0)
         (widget-insert (propertize deft-separator 'face 'deft-separator-face))
         (widget-insert (propertize (substring summary 0 summary-width)
-				   'face 'deft-summary-face)))
+                                   'face 'deft-summary-face)))
       (when mtime
-	(while (< (current-column) (- line-width 1))
-	  (widget-insert " "))
-	(widget-insert (propertize mtime 'face 'deft-time-face)))
+        (while (< (current-column) line-width)
+          (widget-insert " "))
+        (widget-insert (propertize mtime 'face 'deft-time-face)))
       (widget-insert "\n"))))
 
 (add-hook 'window-configuration-change-hook
-	  (lambda ()
-	    (when (and (eq (current-buffer) (get-buffer deft-buffer))
+          (lambda ()
+            (when (and (eq (current-buffer) (get-buffer deft-buffer))
                        (not (eq deft-window-width (window-width))))
               (deft-buffer-setup))))
 
@@ -693,19 +693,19 @@ use it as the title."
   (interactive)
   (let (filename)
     (if (and deft-use-filename-as-title deft-filter-regexp)
-	(setq filename (concat (file-name-as-directory deft-directory) (deft-whole-filter-regexp) "." deft-extension))
+        (setq filename (concat (file-name-as-directory deft-directory) (deft-whole-filter-regexp) "." deft-extension))
       (let (fmt counter temp-buffer)
-	(setq counter 0)
-	(setq fmt (concat "deft-%d." deft-extension))
-	(setq filename (concat (file-name-as-directory deft-directory)
-			       (format fmt counter)))
-	(while (or (file-exists-p filename)
-		   (get-file-buffer filename))
-	  (setq counter (1+ counter))
-	  (setq filename (concat (file-name-as-directory deft-directory)
-				 (format fmt counter))))
-	(when deft-filter-regexp
-	  (write-region (concat (deft-whole-filter-regexp) "\n\n") nil filename nil))))
+        (setq counter 0)
+        (setq fmt (concat "deft-%d." deft-extension))
+        (setq filename (concat (file-name-as-directory deft-directory)
+                               (format fmt counter)))
+        (while (or (file-exists-p filename)
+                   (get-file-buffer filename))
+          (setq counter (1+ counter))
+          (setq filename (concat (file-name-as-directory deft-directory)
+                                 (format fmt counter))))
+        (when deft-filter-regexp
+          (write-region (concat (deft-whole-filter-regexp) "\n\n") nil filename nil))))
     (deft-open-file filename)
     (with-current-buffer (get-file-buffer filename)
       (goto-char (point-max)))))
@@ -757,8 +757,8 @@ If the point is not on a file widget, do nothing."
   (if (not deft-filter-regexp)
       (setq deft-current-files deft-all-files)
     (setq deft-current-files (mapcar (lambda (file)
-				       (deft-filter-match-file file t))
-				     deft-all-files))
+                                       (deft-filter-match-file file t))
+                                     deft-all-files))
     (setq deft-current-files (delq nil deft-current-files))))
 
 (defun deft-filter-match-file (file &optional batch)
@@ -768,14 +768,14 @@ If the point is not on a file widget, do nothing."
     (insert (deft-file-title file))
     (insert (deft-file-contents file))
     (if batch
-	(if (every (lambda (filter)
-		     (goto-char (point-min))
+        (if (every (lambda (filter)
+                     (goto-char (point-min))
                      (deft-search-forward filter))
-		   deft-filter-regexp)
-	    file)
+                   deft-filter-regexp)
+            file)
       (goto-char (point-min))
       (if (deft-search-forward (car deft-filter-regexp))
-	  file))))
+          file))))
 
 ;; Filters that cause a refresh
 
@@ -813,26 +813,26 @@ RESET is non-nil, always replace the entire filter string."
   (interactive)
   (let ((char last-command-event))
     (if (= char ?\S-\ )
-	(setq char ?\s))
+        (setq char ?\s))
     (setq char (char-to-string char))
     (if (and deft-incremental-search (string= char " "))
-	(setq deft-filter-regexp (cons "" deft-filter-regexp))
+        (setq deft-filter-regexp (cons "" deft-filter-regexp))
       (progn
-	(if (car deft-filter-regexp)
-	    (setcar deft-filter-regexp (concat (car deft-filter-regexp) char))
-	  (setq deft-filter-regexp (list char)))
-	(setq deft-current-files (mapcar 'deft-filter-match-file deft-current-files))
-	(setq deft-current-files (delq nil deft-current-files))
-	(deft-refresh-browser)))))
+        (if (car deft-filter-regexp)
+            (setcar deft-filter-regexp (concat (car deft-filter-regexp) char))
+          (setq deft-filter-regexp (list char)))
+        (setq deft-current-files (mapcar 'deft-filter-match-file deft-current-files))
+        (setq deft-current-files (delq nil deft-current-files))
+        (deft-refresh-browser)))))
 
 (defun deft-filter-decrement ()
   "Remove last character from the filter regexp and update `deft-current-files'."
   (interactive)
   (cond ((> (length (car deft-filter-regexp)) 0)
-	 (deft-filter (substring (car deft-filter-regexp) 0 -1)))
-	((> (length deft-filter-regexp) 1)
-	 (deft-filter nil))
-	(t (deft-filter-clear))))
+         (deft-filter (substring (car deft-filter-regexp) 0 -1)))
+        ((> (length deft-filter-regexp) 1)
+         (deft-filter nil))
+        (t (deft-filter-clear))))
 
 (defun deft-complete ()
   "Complete the current action.
